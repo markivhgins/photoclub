@@ -18,32 +18,70 @@
   --grip:clamp(100px,14vw,155px);
   /* Wide left shoulder */
   --lpad:clamp(28px,4vw,55px);
-  --film:80px;
+  --film:0px;
   --EL:min(94vw,92vh);
+  --frame-h:180px;
 }
 @media(max-width:600px){
-  :root{--L:min(52vw,30vh,200px);--grip:70px;--lpad:16px;--film:44px;--EL:min(96vw,72vh);}
+  :root{--L:min(52vw,30vh,200px);--grip:70px;--lpad:16px;--film:0px;--EL:min(96vw,72vh);--frame-h:110px;}
 }
 html,body{width:100%;height:100%;overflow:hidden;background:var(--black);color:var(--white);font-family:'Cormorant Garamond',serif;cursor:crosshair;}
 
 /* ── GRAIN ── */
-body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.7;
+body::after{content:'';position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.7;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");}
 
-/* ── FILM STRIPS ── */
-.film-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;display:flex;justify-content:space-between;}
-.film-col{display:flex;flex-direction:column;flex-shrink:0;width:var(--film);background:#080808;position:relative;overflow:hidden;}
-.film-col:first-child{border-right:2px solid rgba(255,255,255,0.05);}
-.film-col:last-child{border-left:2px solid rgba(255,255,255,0.05);}
-.film-col-inner{display:flex;flex-direction:column;flex-shrink:0;}
-.film-col:nth-child(1) .film-col-inner{animation:filmUp 30s linear infinite;}
-.film-col:nth-child(2) .film-col-inner{animation:filmDn 38s linear infinite;}
-@keyframes filmUp{to{transform:translateY(-50%)}}
-@keyframes filmDn{from{transform:translateY(-50%)}to{transform:translateY(0)}}
-.vfr{flex-shrink:0;width:var(--film);height:110px;position:relative;border-bottom:2px solid rgba(255,255,255,0.1);background:#060606;overflow:hidden;}
-.vfr::before,.vfr::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:9px;height:13px;border-radius:2px;border:1.5px solid rgba(255,255,255,0.18);background:#000;}
-.vfr::before{left:4px;}.vfr::after{right:4px;}
-.vfr-img{position:absolute;inset:8px 18px;}
+/* ── HORIZONTAL FILM STRIP ── */
+.film-bg{
+  position:fixed;
+  left:0;right:0;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:1; /* visual layer behind camera */
+  overflow:hidden;
+  height:var(--frame-h);
+  background:#050505;
+  border-top:3px solid #1a1a1a;
+  border-bottom:3px solid #1a1a1a;
+  pointer-events:all;
+}
+/* sprocket holes top and bottom */
+.film-bg::before,.film-bg::after{
+  content:'';position:absolute;left:0;right:0;height:14px;z-index:5;pointer-events:none;
+  background:repeating-linear-gradient(to right,transparent,transparent 18px,rgba(0,0,0,0) 18px,rgba(0,0,0,0) 22px);
+}
+.film-bg::before{top:4px;}.film-bg::after{bottom:4px;}
+.film-strip-track{
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  width:max-content;
+  height:100%;
+  align-items:stretch;
+}
+@keyframes filmLeft{from{transform:translateX(0)}to{transform:translateX(calc(-100% / 3))}}
+/* Each frame */
+.vfr{
+  flex-shrink:0;
+  width:calc(var(--frame-h) * 1.5);
+  height:100%;
+  position:relative;
+  border-right:2px solid rgba(255,255,255,0.07);
+  background:#060606;
+  overflow:hidden;
+  cursor:pointer;
+  transition:filter .18s, box-shadow .18s;
+}
+.vfr:hover{filter:brightness(1.6);box-shadow:0 0 0 2px rgba(201,168,76,.8) inset, 0 0 30px rgba(201,168,76,.3) inset;cursor:pointer;}
+.vfr:active{filter:brightness(2);}
+/* sprocket holes left+right of each frame */
+.vfr::before,.vfr::after{
+  content:'';position:absolute;left:50%;transform:translateX(-50%);
+  width:13px;height:9px;border-radius:2px;
+  border:1.5px solid rgba(255,255,255,0.18);background:#000;z-index:4;
+}
+.vfr::before{top:4px;}.vfr::after{bottom:4px;}
+.vfr-img{position:absolute;inset:18px 8px;}
 .vfr:nth-child(8n+1) .vfr-img{background:radial-gradient(ellipse at 30% 70%,#3a1800,#040200);filter:sepia(1)contrast(1.4)brightness(.6);}
 .vfr:nth-child(8n+2) .vfr-img{background:radial-gradient(ellipse at 70% 20%,#0a1530,#000);filter:brightness(.6)contrast(1.5);}
 .vfr:nth-child(8n+3) .vfr-img{background:radial-gradient(ellipse at 50% 90%,#1a0800,#010101);filter:sepia(.9)brightness(.55);}
@@ -52,44 +90,110 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 .vfr:nth-child(8n+6) .vfr-img{background:radial-gradient(ellipse at 55% 60%,#1a0a00,#000);filter:sepia(1)contrast(1.2);}
 .vfr:nth-child(8n+7) .vfr-img{background:radial-gradient(ellipse at 40% 40%,#0e140e,#010101);filter:contrast(1.7)brightness(.45);}
 .vfr:nth-child(8n+8) .vfr-img{background:radial-gradient(ellipse at 65% 75%,#1c0505,#000);filter:sepia(.8)brightness(.55);}
-.vfr-num{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:5px;color:rgba(255,255,255,.25);letter-spacing:.06em;}
-.film-col::before,.film-col::after{content:'';position:absolute;left:0;right:0;height:100px;z-index:5;pointer-events:none;}
-.film-col::before{top:0;background:linear-gradient(to bottom,#060606,transparent);}
-.film-col::after{bottom:0;background:linear-gradient(to top,#060606,transparent);}
+.vfr-num{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  font-family:'Space Mono',monospace;font-size:5px;
+  color:rgba(255,255,255,.25);letter-spacing:.06em;z-index:3;pointer-events:none;
+}
+.vfr-label{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Space Mono',monospace;font-size:clamp(5px,0.6vw,8px);
+  letter-spacing:.12em;color:rgba(201,168,76,.22);text-transform:uppercase;
+  text-align:center;z-index:3;pointer-events:none;transition:color .2s, text-shadow .2s;white-space:nowrap;
+}
+.vfr:hover .vfr-label{color:rgba(201,168,76,1);text-shadow:0 0 12px rgba(201,168,76,.8);}
+.film-bg:hover .film-strip-track{animation-play-state:paused;}
+/* fade edges of film strip */
+.film-fade-l,.film-fade-r{
+  position:absolute;top:0;bottom:0;width:80px;z-index:6;pointer-events:none;
+}
+.film-fade-l{left:0;background:linear-gradient(to right,#060606,transparent);}
+.film-fade-r{right:0;background:linear-gradient(to left,#060606,transparent);}
+/* Film frame info popup */
+#film-popup{
+  position:fixed;z-index:500;
+  background:linear-gradient(148deg,#131313,#0b0b0b);
+  border:1px solid rgba(201,168,76,.3);border-radius:3px;
+  padding:28px 32px;
+  min-width:280px;max-width:360px;
+  box-shadow:0 20px 60px rgba(0,0,0,.95);
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease;
+  transform:translateY(8px);
+}
+#film-popup.show{opacity:1;pointer-events:all;transform:translateY(0);}
+#film-popup .fp-tag{font-family:'Space Mono',monospace;font-size:.42rem;letter-spacing:.28em;color:var(--gold);margin-bottom:6px;text-transform:uppercase;}
+#film-popup .fp-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,3vw,2rem);letter-spacing:.07em;line-height:1;margin-bottom:12px;}
+#film-popup .fp-body{font-family:'Cormorant Garamond',serif;font-size:.95rem;line-height:1.75;color:rgba(240,234,216,.7);}
+#film-popup .fp-close{
+  position:absolute;top:10px;right:14px;font-family:'Space Mono',monospace;
+  font-size:.48rem;letter-spacing:.2em;color:var(--silver);cursor:pointer;
+  background:none;border:none;transition:color .2s;
+}
+#film-popup .fp-close:hover{color:var(--gold);}
+#film-popup .fp-footer{
+  margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);
+  font-family:'Space Mono',monospace;font-size:.4rem;letter-spacing:.16em;
+  color:rgba(255,255,255,.2);
+}
 
 /* ── INTRO ── */
-#intro{position:fixed;inset:0;z-index:200;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s ease;}
+#intro{
+  position:fixed;inset:0;z-index:200;
+  background:var(--black);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:.8rem;
+  transition:opacity .4s ease;
+}
 #intro.out{opacity:0;pointer-events:none;}
 .intro-logo{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(4rem,13vw,10rem);
-  letter-spacing:.44em;
+  font-size:clamp(3.5rem,11vw,9rem);
+  letter-spacing:.38em;
+  padding-right:.38em;
   opacity:0;
   animation:fadeUp 1.1s cubic-bezier(.16,1,.3,1) .2s forwards;
   text-align:center;
-  margin:0 auto;
+  width:100%;
+  line-height:1;
 }
-.intro-sub{font-family:'Space Mono',monospace;font-size:clamp(.48rem,1vw,.72rem);letter-spacing:.54em;color:var(--gold);opacity:0;animation:fadeUp .9s ease 1.05s forwards;margin-top:.5rem;text-align:center;
-  margin:0 auto;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.intro-sub{
+  font-family:'Space Mono',monospace;
+  font-size:clamp(.42rem,.85vw,.65rem);
+  letter-spacing:.46em;
+  padding-right:.46em;
+  color:var(--gold);
+  opacity:0;
+  animation:fadeUp .9s ease 1.05s forwards;
+  text-align:center;
+  width:100%;
+}
+.intro-line{
+  width:clamp(40px,8vw,80px);height:1px;
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+  opacity:0;
+  animation:fadeUp .7s ease 1.35s forwards;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 #flash{position:fixed;inset:0;z-index:300;background:#fff;opacity:0;pointer-events:none;}
 #flash.fire{animation:bigFlash .95s ease forwards;}
 @keyframes bigFlash{0%{opacity:0}7%{opacity:1}30%{opacity:.9}65%{opacity:.25}100%{opacity:0;visibility:hidden}}
 
 /* ── TICKER ── */
-.ticker{position:fixed;bottom:0;left:var(--film);right:var(--film);height:26px;z-index:10;border-top:1px solid #191919;background:var(--black);overflow:hidden;display:flex;align-items:center;}
+.ticker{position:fixed;bottom:0;left:0;right:0;height:26px;z-index:10;border-top:1px solid #191919;background:var(--black);overflow:hidden;display:flex;align-items:center;}
 .ticker-track{display:flex;gap:72px;white-space:nowrap;animation:tickRoll 32s linear infinite;}
 @keyframes tickRoll{to{transform:translateX(-50%)}}
 .tick{font-family:'Space Mono',monospace;font-size:.43rem;letter-spacing:.24em;color:rgba(255,255,255,.12);text-transform:uppercase;}
 .tick b{color:var(--gold);font-weight:400;margin-right:5px;}
 
 /* ── SCENE ── */
-#scene{position:fixed;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;}
-#scene.show{opacity:1;pointer-events:all;transition:opacity .5s ease;}
+#scene{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;}
+#scene.show{opacity:1;pointer-events:none;transition:opacity .5s ease;}
 @media(max-width:600px){#scene{padding-bottom:30px;}}
 
 /* ── CAMERA WRAP ── */
-.cam-wrap{position:relative;display:flex;align-items:center;}
+.cam-wrap{position:relative;display:flex;align-items:center;pointer-events:all;}
 .cam-col{display:flex;flex-direction:column;align-items:center;position:relative;z-index:2;
   transition:transform .7s cubic-bezier(.4,0,.2,1), opacity .55s ease;}
 
@@ -109,34 +213,38 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 .cam-body{
   --ph:clamp(8px,1.8vw,16px);
   position:relative;display:flex;flex-direction:column;
-  /* Wide body: lens + generous left pad + large grip = D7500 rectangular shape */
   width:calc(var(--L) + var(--lpad)*2 + var(--grip));
   max-width:calc(100vw - var(--film)*2 - 8px);
-  background:linear-gradient(175deg,#1c1c1c 0%,#181818 30%,#151515 60%,#111 100%);
-  border-radius:5px 0 0 4px;
+  background:
+    linear-gradient(175deg,#242424 0%,#1e1e1e 18%,#1a1a1a 40%,#161616 65%,#111 100%);
+  border-radius:8px 2px 2px 6px;
   box-shadow:
-    0 0 0 1px #2a2a2a,
-    0 0 0 2px #060606,
-    0 40px 100px rgba(0,0,0,.99),
-    inset 0 1px 0 rgba(255,255,255,.04);
+    0 0 0 1px #303030,
+    0 0 0 2.5px #0a0a0a,
+    0 0 0 3px #222,
+    0 30px 80px rgba(0,0,0,.99),
+    0 8px 30px rgba(0,0,0,.85),
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -1px 0 rgba(0,0,0,.6);
   overflow:visible;
 }
-/* Pebbled body texture */
+/* Leatherette body texture */
 .cam-body::before{
   content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
   background:
-    radial-gradient(circle at 2px 2px,rgba(255,255,255,.018) 1px,transparent 1px),
-    linear-gradient(175deg,rgba(255,255,255,.02) 0%,transparent 50%);
-  background-size:3.5px 3.5px,100% 100%;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='1' height='1' fill='rgba(255,255,255,0.015)'/%3E%3Crect x='2' y='2' width='1' height='1' fill='rgba(255,255,255,0.012)'/%3E%3C/svg%3E"),
+    linear-gradient(175deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.01) 30%,transparent 60%);
+  background-size:4px 4px,100% 100%;
 }
-/* Nikon red accent line on body front */
+/* Nikon red accent stripe — runs full width of lens panel */
 .cam-body::after{
   content:'';position:absolute;
-  top:0;left:calc(var(--lpad) + 2px);
-  width:calc(var(--L)*.54);height:2px;
-  background:linear-gradient(to right,transparent,#c8102e 6%,#c8102e 92%,transparent);
-  box-shadow:0 0 10px rgba(200,16,46,.55);
+  top:0;left:clamp(10px,2vw,20px);
+  width:calc(var(--L) + var(--lpad) + 8px);height:2.5px;
+  background:linear-gradient(to right,transparent 2%,#d01030 8%,#e01535 90%,transparent);
+  box-shadow:0 0 14px rgba(210,20,48,.7), 0 0 4px rgba(210,20,48,.5);
   pointer-events:none;z-index:10;
+  border-radius:0 0 2px 0;
 }
 
 /* Lens mount ring — the chrome ring around where lens meets body */
@@ -153,32 +261,36 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 }
 @media(max-width:600px){.cam-top-deck{height:38px;}}
 
-/* Pentaprism — D7500: wide, flat-topped, center-left */
+/* Pentaprism — D7500: wide, trapezoidal hump, center-left */
 .cam-pentaprism{
   position:absolute;
   left:calc(var(--lpad) + var(--L)*.05);
   bottom:0;
-  width:calc(var(--L)*.5);
-  height:54px;
-  background:linear-gradient(180deg,#1d1d1d 0%,#181818 55%,#161616 100%);
-  border-radius:2px 2px 0 0;
-  border:1px solid #2c2c2c;border-bottom:none;
-  box-shadow:0 -4px 16px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.035);
-  clip-path:polygon(0% 100%,1% 0%,99% 0%,100% 100%);
+  width:calc(var(--L)*.52);
+  height:56px;
+  background:linear-gradient(180deg,#282828 0%,#202020 35%,#1a1a1a 60%,#161616 100%);
+  border-radius:3px 3px 0 0;
+  border:1px solid #333;border-bottom:none;
+  box-shadow:
+    0 -6px 24px rgba(0,0,0,.9),
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 1px 0 0 rgba(255,255,255,.03),
+    inset -1px 0 0 rgba(0,0,0,.4);
+  clip-path:polygon(0% 100%,3% 0%,97% 0%,100% 100%);
 }
 /* "Nikon" label on pentaprism */
 .cam-pentaprism-logo{
   position:absolute;
   left:calc(var(--lpad) + var(--L)*.05);
-  bottom:20px;
-  width:calc(var(--L)*.5);
+  bottom:22px;
+  width:calc(var(--L)*.52);
   text-align:center;
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(.55rem,2.2vw,.95rem);
-  letter-spacing:.28em;
-  color:rgba(255,255,255,.62);
+  font-size:clamp(.58rem,2.4vw,1rem);
+  letter-spacing:.32em;
+  color:rgba(255,255,255,.7);
   pointer-events:none;z-index:8;
-  text-shadow:0 1px 3px rgba(0,0,0,.9);
+  text-shadow:0 1px 4px rgba(0,0,0,.95), 0 0 20px rgba(255,255,255,.05);
 }
 /* "D7500" model number on pentaprism bottom right */
 .cam-pentaprism-model{
@@ -194,54 +306,64 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 /* Viewfinder eyecup */
 .cam-pentaprism::after{
   content:'';position:absolute;
-  top:12px;left:22%;right:30%;height:16px;
-  background:linear-gradient(to bottom,#040404,#0a0a0a);
-  border-radius:3px;border:1.5px solid #383838;
-  box-shadow:inset 0 4px 12px rgba(0,0,0,.98),0 1px 0 rgba(255,255,255,.03);
+  top:10px;left:18%;right:28%;height:20px;
+  background:linear-gradient(to bottom,#020202,#080808);
+  border-radius:4px 4px 2px 2px;
+  border:1.5px solid #404040;
+  box-shadow:
+    inset 0 4px 16px rgba(0,0,0,1),
+    inset 0 0 8px rgba(0,0,0,.9),
+    0 1px 0 rgba(255,255,255,.04),
+    0 0 12px rgba(0,0,0,.5);
 }
 /* Diopter dial — small circle right of VF */
 .cam-pentaprism::before{
   content:'';position:absolute;
-  top:15px;right:24%;
-  width:13px;height:13px;border-radius:50%;
-  background:conic-gradient(from 0deg,#252525,#353535,#181818,#303030);
-  border:1px solid #2e2e2e;
-  box-shadow:0 1px 4px rgba(0,0,0,.8);
+  top:14px;right:22%;
+  width:14px;height:14px;border-radius:50%;
+  background:conic-gradient(from 0deg,#2e2e2e,#424242,#1c1c1c,#383838,#1a1a1a);
+  border:1.5px solid #383838;
+  box-shadow:0 2px 6px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.05);
 }
 
 /* Mode dial — top left, D7500's large textured dial */
 .cam-mode-dial{
   position:absolute;
-  left:calc(var(--lpad) - 14px);
+  left:clamp(6px,1.2vw,14px);
   bottom:7px;
-  width:46px;height:46px;border-radius:50%;
+  width:48px;height:48px;border-radius:50%;
   background:conic-gradient(from 18deg,
-    #1a1a1a 0deg,#282828 30deg,
-    #111 60deg,#222 90deg,
-    #191919 120deg,#2c2c2c 150deg,
-    #0f0f0f 180deg,#232323 210deg,
-    #181818 240deg,#272727 270deg,
-    #111 300deg,#212121 330deg,
-    #1a1a1a 360deg
+    #222 0deg,#333 22deg,
+    #141414 50deg,#2a2a2a 80deg,
+    #1a1a1a 108deg,#323232 135deg,
+    #111 165deg,#282828 192deg,
+    #1c1c1c 220deg,#2e2e2e 248deg,
+    #121212 278deg,#252525 308deg,
+    #1e1e1e 335deg,#222 360deg
   );
-  border:2px solid #333;
-  box-shadow:0 5px 18px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.055),inset 0 -1px 0 rgba(0,0,0,.6);
+  border:2px solid #3a3a3a;
+  box-shadow:
+    0 6px 20px rgba(0,0,0,.98),
+    0 2px 6px rgba(0,0,0,.8),
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.7);
   z-index:8;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:box-shadow .15s,transform .1s;touch-action:manipulation;
 }
 /* Inner hub of mode dial */
 .cam-mode-dial::before{
-  content:'';position:absolute;inset:8px;border-radius:50%;
-  background:radial-gradient(circle at 40% 35%,#252525,#111);
-  border:1px solid #242424;
+  content:'';position:absolute;inset:9px;border-radius:50%;
+  background:radial-gradient(circle at 38% 32%,#2e2e2e,#111 70%);
+  border:1px solid #2c2c2c;
+  box-shadow:inset 0 1px 4px rgba(0,0,0,.8);
 }
 /* Indicator marker at top */
 .cam-mode-dial::after{
   content:'';position:absolute;
-  width:3px;height:3px;border-radius:50%;
+  width:4px;height:4px;border-radius:50%;
   background:var(--gold);top:4px;left:50%;transform:translateX(-50%);
-  box-shadow:0 0 6px var(--gold);z-index:1;
+  box-shadow:0 0 8px var(--gold), 0 0 3px var(--gold);z-index:1;
 }
 .cam-mode-dial:hover{box-shadow:0 0 20px rgba(201,168,76,.4);}
 .cam-mode-dial:active{transform:scale(.92);}
@@ -253,38 +375,56 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 /* Top info LCD */
 .cam-top-lcd{
   position:absolute;
-  right:calc(var(--grip) + 3px);
+  right:calc(var(--grip) + 14px);
   top:4px;
-  width:clamp(50px,9vw,74px);height:46px;
-  background:#010d04;border:1px solid #142010;border-radius:2px;
+  width:clamp(52px,9.5vw,78px);height:46px;
+  background:linear-gradient(160deg,#010e05,#011008);
+  border:1px solid #162414;
+  border-radius:3px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  box-shadow:0 0 10px rgba(57,255,143,.05),inset 0 2px 6px rgba(0,0,0,.95);
+  box-shadow:
+    0 0 16px rgba(57,255,143,.08),
+    0 0 4px rgba(57,255,143,.04),
+    inset 0 2px 8px rgba(0,0,0,.98),
+    inset 0 0 12px rgba(57,255,143,.03);
   overflow:hidden;z-index:6;
 }
 .cam-top-lcd::before{content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(to bottom,transparent,transparent 2px,rgba(0,0,0,.15) 2px,rgba(0,0,0,.15) 3px);}
-.cam-top-lcd-text{font-family:'Space Mono',monospace;font-size:clamp(4.5px,1vw,6px);color:rgba(57,255,143,.78);letter-spacing:.03em;text-align:center;line-height:1.8;z-index:1;pointer-events:none;}
+  background:repeating-linear-gradient(to bottom,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 3px);}
+.cam-top-lcd-text{
+  font-family:'Space Mono',monospace;
+  font-size:clamp(5px,1.1vw,7px);
+  color:rgba(57,255,143,.85);
+  letter-spacing:.04em;text-align:center;line-height:1.9;
+  z-index:1;pointer-events:none;
+  text-shadow:0 0 6px rgba(57,255,143,.5);
+}
 
 /* Right deck — shutter button platform */
 .cam-deck-right{
   position:absolute;right:0;bottom:0;
-  width:calc(var(--grip) + 8px);height:42px;
-  background:linear-gradient(to bottom,#181818,#131313);
-  border-radius:4px 4px 0 0;
-  border:1px solid #252525;border-bottom:none;
+  width:calc(var(--grip) + 8px);height:44px;
+  background:linear-gradient(to bottom,#1e1e1e,#161616);
+  border-radius:5px 5px 0 0;
+  border:1px solid #2e2e2e;border-bottom:none;
   display:flex;align-items:center;justify-content:center;
-  gap:7px;padding:0 6px;
+  gap:8px;padding:0 8px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 -2px 8px rgba(0,0,0,.4);
 }
 @media(max-width:600px){.cam-deck-right{height:30px;}}
 
-/* Shutter button — D7500: raised oval, red thread visible */
+/* Shutter button — D7500: raised oval, metallic with red thread */
 .shutter-btn{
-  width:22px;height:17px;
-  border-radius:50% 50% 42% 42%;
-  background:linear-gradient(to bottom,#666 0%,#505050 42%,#353535 100%);
-  border:1px solid #6a6a6a;
+  width:24px;height:19px;
+  border-radius:50% 50% 44% 44%;
+  background:linear-gradient(170deg,#7a7a7a 0%,#606060 30%,#484848 65%,#303030 100%);
+  border:1px solid #777;
   cursor:pointer;position:relative;
-  box-shadow:0 4px 12px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.2);
+  box-shadow:
+    0 4px 14px rgba(0,0,0,.95),
+    0 2px 4px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.28),
+    inset 0 -1px 0 rgba(0,0,0,.4);
   transition:transform .08s,background .2s,box-shadow .2s;
   flex-shrink:0;touch-action:manipulation;
 }
@@ -292,11 +432,15 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 .shutter-btn::before{
   content:'';position:absolute;
   top:3px;left:50%;transform:translateX(-50%);
-  width:7px;height:2px;border-radius:1px;
-  background:rgba(200,16,46,.8);
-  box-shadow:0 0 4px rgba(200,16,46,.4);
+  width:8px;height:2px;border-radius:1px;
+  background:rgba(210,20,46,.9);
+  box-shadow:0 0 6px rgba(210,20,46,.5);
 }
-.shutter-btn::after{content:'';position:absolute;top:5px;left:18%;right:18%;height:3px;border-radius:50%;background:rgba(255,255,255,.12);}
+.shutter-btn::after{
+  content:'';position:absolute;top:5px;left:16%;right:16%;
+  height:4px;border-radius:50%;
+  background:rgba(255,255,255,.14);
+}
 .shutter-btn:hover,.shutter-btn.active-btn{
   background:linear-gradient(to bottom,#1a3240,#0e1e28);
   border-color:rgba(201,168,76,.6);box-shadow:0 0 14px rgba(201,168,76,.5);
@@ -327,11 +471,12 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
   align-items:center;
   position:relative;
 }
-/* Subtle front body panel separation */
+/* Subtle front body panel separation — chrome-like divider line */
 .cam-lens-section::before{
   content:'';position:absolute;
   top:0;bottom:0;left:0;right:0;
-  border-right:1px solid #1e1e1e;
+  border-right:1px solid #252525;
+  box-shadow:1px 0 0 rgba(0,0,0,.5);
   pointer-events:none;
 }
 .cam-brand-label{
@@ -342,42 +487,50 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
   margin-bottom:clamp(2px,.5vh,5px);
   padding-left:6px; /* nudges text left a bit */
 }
-.cam-brand{font-family:'Bebas Neue',sans-serif;font-size:clamp(.7rem,3.5vw,1.1rem);letter-spacing:.28em;color:var(--gold);text-shadow:0 0 14px rgba(201,168,76,.2);}
-.cam-spec{font-family:'Space Mono',monospace;font-size:clamp(.24rem,1.5vw,.36rem);color:var(--silver);letter-spacing:.12em;opacity:.42;}
+.cam-brand{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(.75rem,3.8vw,1.15rem);
+  letter-spacing:.3em;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(201,168,76,.35), 0 1px 2px rgba(0,0,0,.8);
+}
+.cam-spec{font-family:'Space Mono',monospace;font-size:clamp(.22rem,1.4vw,.34rem);color:var(--silver);letter-spacing:.13em;opacity:.38;}
 
-/* ── GRIP — D7500: extremely deep, forward-curving, full-height rubber grip ── */
+/* ── GRIP — D7500: deep rubber-clad forward grip ── */
 .cam-grip{
   width:var(--grip);flex-shrink:0;
   background:linear-gradient(to right,
-    #070707 0%,
-    #0a0a0a 20%,
-    #080808 55%,
-    #060606 100%);
-  /* D7500 grip: big radius on right = very curved forward grip */
-  border-radius:0 14px 12px 0;
-  border-left:1px solid #141414;
+    #0a0a0a 0%,
+    #0e0e0e 18%,
+    #0b0b0b 50%,
+    #070707 80%,
+    #050505 100%);
+  border-radius:0 16px 14px 0;
+  border-left:1px solid #1a1a1a;
   position:relative;overflow:hidden;
   box-shadow:
-    inset -6px 0 18px rgba(0,0,0,.9),
-    7px 0 22px rgba(0,0,0,.7),
-    inset 2px 0 0 rgba(255,255,255,.012);
+    inset -8px 0 22px rgba(0,0,0,.95),
+    8px 0 28px rgba(0,0,0,.75),
+    inset 2px 0 0 rgba(255,255,255,.015),
+    inset 0 0 40px rgba(0,0,0,.5);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:10px;padding:60px 0 24px;
+  gap:10px;padding:62px 0 24px;
 }
 /* Raised dot rubber texture — Nikon signature */
 .cam-grip::before{
   content:'';position:absolute;inset:0;
   background:
-    radial-gradient(circle at 2px 2px,rgba(255,255,255,.025) 1.3px,transparent 1.3px),
-    linear-gradient(to right,rgba(0,0,0,.3),rgba(0,0,0,.06) 38%,rgba(0,0,0,.22));
+    radial-gradient(circle at 2px 2px,rgba(255,255,255,.028) 1.4px,transparent 1.4px),
+    linear-gradient(to right,rgba(0,0,0,.35),rgba(0,0,0,.08) 35%,rgba(0,0,0,.25));
   background-size:5px 5px,100% 100%;
 }
-/* Right edge curve highlight */
+/* Right edge gloss curve highlight */
 .cam-grip::after{
-  content:'';position:absolute;top:10%;bottom:10%;right:2px;width:3px;
-  background:linear-gradient(to bottom,transparent,rgba(255,255,255,.04) 30%,rgba(255,255,255,.04) 70%,transparent);
-  border-radius:2px;
+  content:'';position:absolute;top:8%;bottom:8%;right:3px;width:4px;
+  background:linear-gradient(to bottom,transparent 5%,rgba(255,255,255,.055) 25%,rgba(255,255,255,.055) 75%,transparent 95%);
+  border-radius:3px;
 }
+
 
 /* Small top LCD on grip showing ISO */
 .cam-lcd{
@@ -424,20 +577,22 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 /* ── BOTTOM BAR ── */
 .cam-bottom{
   display:flex;align-items:center;justify-content:space-between;
-  padding:clamp(4px,.7vh,8px) var(--lpad);
+  padding:clamp(4px,.7vh,9px) var(--lpad);
   padding-right:calc(var(--lpad) + var(--grip));
-  border-top:1px solid #181818;
-  background:linear-gradient(to bottom,#101010,#0b0b0b);
-  border-radius:0 0 0 4px;
+  border-top:1px solid #202020;
+  background:linear-gradient(to bottom,#141414,#0d0d0d);
+  border-radius:0 0 2px 6px;
   position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
 }
 /* Port door */
 .cam-bottom::after{
   content:'';position:absolute;
-  left:calc(var(--lpad) + var(--L)*.5);bottom:4px;
-  width:24px;height:10px;border-radius:2px;
-  border:1px solid #1e1e1e;
-  background:linear-gradient(to bottom,#0d0d0d,#080808);
+  left:calc(var(--lpad) + var(--L)*.5);bottom:5px;
+  width:26px;height:10px;border-radius:2px;
+  border:1px solid #222;
+  background:linear-gradient(to bottom,#0f0f0f,#090909);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.7);
 }
 .cam-rd{font-family:'Space Mono',monospace;font-size:clamp(.24rem,1.5vw,.38rem);letter-spacing:.13em;opacity:.4;}
 .cam-rd.g{color:var(--gold);}.cam-rd.s{color:var(--silver);}
@@ -448,25 +603,40 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 
 /* rings — Nikon AF-S Nikkor style multi-ring barrel */
 .ring{position:absolute;border-radius:50%;}
-/* Outer bezel ring — full diameter */
+/* Outer bezel ring — full diameter, chrome-edged */
 .r-outer{
   inset:0;
-  background:conic-gradient(from 0deg,#1e1e1e,#323232,#101010,#2e2e2e,#181818,#383838,#101010,#2a2a2a,#1a1a1a,#303030,#0e0e0e,#1e1e1e);
-  box-shadow:0 0 0 2px #060606,0 0 0 5px #141414,0 18px 60px rgba(0,0,0,.98);
+  background:conic-gradient(from 0deg,
+    #222,#383838,#111,#323232,
+    #1a1a1a,#404040,#0f0f0f,#2e2e2e,
+    #1c1c1c,#363636,#101010,#222);
+  box-shadow:
+    0 0 0 2px #050505,
+    0 0 0 4px #1c1c1c,
+    0 0 0 5px #080808,
+    0 20px 60px rgba(0,0,0,.98),
+    inset 0 0 30px rgba(0,0,0,.6);
   animation:spinFwd 32s linear infinite;
 }
-/* Middle focusing ring */
+/* Middle focusing ring — textured */
 .r-mid{
   inset:8%;
-  background:conic-gradient(from 80deg,#3a3a3a,#141414,#4a4a4a,#141414,#3a3a3a,#101010,#3e3e3e,#141414);
+  background:conic-gradient(from 80deg,
+    #424242,#161616,#505050,#141414,
+    #3e3e3e,#111,#464646,#141414);
   animation:spinRev 20s linear infinite;
-  box-shadow:inset 0 0 20px rgba(0,0,0,.8),0 0 0 1px #080808;
+  box-shadow:inset 0 0 24px rgba(0,0,0,.85),0 0 0 1px #060606;
 }
-/* Inner mount ring */
+/* Inner mount ring — chrome bayonet effect */
 .r-inner{
   inset:17%;
-  background:radial-gradient(circle at 42% 38%,#262626,#0e0e0e 65%);
-  box-shadow:inset 0 0 50px rgba(0,0,0,.95),0 0 0 1px #0a0a0a;
+  background:
+    radial-gradient(circle at 42% 38%,#2a2a2a,#0e0e0e 65%),
+    conic-gradient(from 45deg,#1a1a1a,#2c2c2c,#111,#2a2a2a,#1a1a1a);
+  box-shadow:
+    inset 0 0 50px rgba(0,0,0,.98),
+    inset 0 2px 4px rgba(255,255,255,.04),
+    0 0 0 1px #080808;
 }
 @keyframes spinFwd{to{transform:rotate(360deg)}}
 @keyframes spinRev{to{transform:rotate(-360deg)}}
@@ -884,14 +1054,28 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 </head>
 <body>
 
-<!-- FILM STRIPS -->
-<div class="film-bg" aria-hidden="true">
-  <div class="film-col"><div class="film-col-inner" id="fc1"></div></div>
-  <div class="film-col"><div class="film-col-inner" id="fc2"></div></div>
+<!-- HORIZONTAL FILM STRIP -->
+<div class="film-bg" aria-hidden="false" id="filmBg">
+  <div class="film-strip-track" id="filmTrack"></div>
+  <div class="film-fade-l"></div>
+  <div class="film-fade-r"></div>
+</div>
+
+<!-- FILM FRAME POPUP -->
+<div id="film-popup">
+  <button class="fp-close" id="fpClose">[ ✕ ]</button>
+  <div class="fp-tag" id="fpTag"></div>
+  <div class="fp-title" id="fpTitle"></div>
+  <div class="fp-body" id="fpBody"></div>
+  <div class="fp-footer" id="fpFooter"></div>
 </div>
 
 <!-- INTRO -->
-<div id="intro"><div class="intro-logo">Rangeen Pixels</div><div class="intro-sub">◆ &nbsp;College Photography Club&nbsp; ◆</div></div>
+<div id="intro">
+  <div class="intro-logo">Rangeen Pixels</div>
+  <div class="intro-line"></div>
+  <div class="intro-sub">◆ &nbsp; College Photography Club &nbsp; ◆</div>
+</div>
 <div id="flash"></div>
 
 <!-- TICKER -->
@@ -1070,11 +1254,101 @@ body::after{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opac
 </div>
 
 <script>
-/* ══ FILM STRIPS ══ */
-['fc1','fc2'].forEach((id,ci)=>{
-  const n=ci===0?16:18;const col=document.getElementById(id);
-  col.innerHTML=[...Array(n*2)].map((_,i)=>`<div class="vfr"><div class="vfr-img"></div><div class="vfr-num">${String((i%n)+1).padStart(2,'0')}</div></div>`).join('');
-});
+/* ══ HORIZONTAL FILM STRIP ══ */
+(function(){
+  const FRAMES = [
+    {tag:'Gallery',       title:'Photo Gallery',    body:'A curated collection of member work — golden hour, darkroom prints, street documentary.', footer:'247 prints · 35mm & digital'},
+    {tag:'Events',        title:'Upcoming Events',  body:'Monthly photowalks, film nights, portfolio critiques. Next walk: March 22 at the Botanic Garden, 5:30 PM.', footer:'12 events this term'},
+    {tag:'About Us',      title:'Rangeen Pixels',   body:'Founded 2019 in a dorm room. Now running a darkroom, studio bay, and 30+ camera lending library.', footer:'Est. 2019 · 47 members'},
+    {tag:'Workshops',     title:'Learn With Us',    body:'Film 101, Studio Lighting, Lightroom, Street Ethics, Composition Deep Dive — every semester, free for members.', footer:'5 active workshops'},
+    {tag:'Members',       title:'Our Community',    body:'47 active photographers across all disciplines. A six-person committee leads the club through the year.', footer:'47 active · 6 on committee'},
+    {tag:'Gear Library',  title:'Borrow a Camera',  body:'Canon R6, Hasselblad 500CM, Nikon FM2, Profoto B10 strobes. 48-hour loans, free for members in good standing.', footer:'31 bodies · 48hr max loan'},
+    {tag:'Join',          title:'Become a Member',  body:'Open to all enrolled students. Annual dues €20 cover darkroom access, all gear loans, and every event.', footer:'€20/year · Open enrollment'},
+    {tag:'Awards',        title:'Honours',          body:'NPSA Photo of the Year, National Student Award, Best University Club 2024. Our work speaks for itself.', footer:'6 trophies · National level'},
+  ];
+
+  const track = document.getElementById('filmTrack');
+  const n = FRAMES.length;
+  // build 3 sets for seamless loop
+  let html = '';
+  for(let rep=0;rep<3;rep++){
+    for(let i=0;i<n;i++){
+      const f = FRAMES[i];
+      const globalIdx = rep*n + i;
+      html += `<div class="vfr" data-idx="${i}" role="button" tabindex="0" aria-label="Open ${f.title}">
+        <div class="vfr-img"></div>
+        <div class="vfr-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="vfr-label">${f.tag}</div>
+      </div>`;
+    }
+  }
+  track.innerHTML = html;
+
+  // Set animation
+  track.style.animation = 'filmLeft 45s linear infinite';
+
+  // Popup logic
+  const popup = document.getElementById('film-popup');
+  const fpClose = document.getElementById('fpClose');
+  let activeFrame = null;
+
+  function showPopup(frameEl, idx){
+    const f = FRAMES[idx % n];
+    document.getElementById('fpTag').textContent = f.tag;
+    document.getElementById('fpTitle').textContent = f.title;
+    document.getElementById('fpBody').textContent = f.body;
+    document.getElementById('fpFooter').textContent = f.footer;
+
+    // Position popup near the frame but ensure it stays on screen
+    const rect = frameEl.getBoundingClientRect();
+    const pw = 360, ph = 180;
+    let left = rect.left + rect.width/2 - pw/2;
+    let top = rect.top - ph - 14;
+    if(top < 10) top = rect.bottom + 14;
+    if(left < 10) left = 10;
+    if(left + pw > window.innerWidth - 10) left = window.innerWidth - pw - 10;
+
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+    popup.style.width = pw + 'px';
+    popup.classList.add('show');
+    activeFrame = frameEl;
+
+    // Pause strip while popup open
+    track.style.animationPlayState = 'paused';
+  }
+
+  function hidePopup(){
+    popup.classList.remove('show');
+    track.style.animationPlayState = 'running';
+    activeFrame = null;
+  }
+
+  fpClose.addEventListener('click', e => { e.stopPropagation(); hidePopup(); });
+  popup.addEventListener('click', e => e.stopPropagation());
+
+  document.addEventListener('click', e => {
+    const fr = e.target.closest('.vfr');
+    if(fr){
+      const idx = parseInt(fr.dataset.idx, 10);
+      if(activeFrame === fr && popup.classList.contains('show')){
+        hidePopup();
+      } else {
+        showPopup(fr, idx);
+      }
+    } else if(!popup.contains(e.target)){
+      hidePopup();
+    }
+  });
+
+  // Keyboard support
+  track.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){
+      const fr = e.target.closest('.vfr');
+      if(fr){ e.preventDefault(); fr.click(); }
+    }
+  });
+})();
 
 /* ══ DATA ══ */
 const DATA={
