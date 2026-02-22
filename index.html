@@ -151,7 +151,9 @@ body::after{content:'';position:fixed;inset:0;z-index:3;pointer-events:none;opac
   font-family:'Bebas Neue',sans-serif;
   font-size:clamp(3.5rem,11vw,9rem);
   letter-spacing:.38em;
-  padding-right:.38em;
+  /* letter-spacing adds space AFTER every char incl. last, pushing text right.
+     text-indent compensates by shifting the whole block left by one spacing unit */
+  text-indent:.38em;
   opacity:0;
   animation:fadeUp 1.1s cubic-bezier(.16,1,.3,1) .2s forwards;
   text-align:center;
@@ -162,7 +164,7 @@ body::after{content:'';position:fixed;inset:0;z-index:3;pointer-events:none;opac
   font-family:'Space Mono',monospace;
   font-size:clamp(.42rem,.85vw,.65rem);
   letter-spacing:.46em;
-  padding-right:.46em;
+  text-indent:.46em;
   color:var(--gold);
   opacity:0;
   animation:fadeUp .9s ease 1.05s forwards;
@@ -1114,7 +1116,6 @@ body::after{content:'';position:fixed;inset:0;z-index:3;pointer-events:none;opac
           </div>
           <div class="cam-pentaprism"></div>
           <div class="cam-pentaprism-logo">Nikon</div>
-      
           <div class="cam-top-lcd">
             <div class="cam-top-lcd-text">1/250<br>F5.6<br>ISO400</div>
           </div>
